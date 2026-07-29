@@ -28,3 +28,8 @@ QEMU/KVM GPU passthrough for GTX 1660 SUPER with anti-cheat evasion.
 4. docker-ports.service → external access
 
 ## NEVER destroy the VM — use virsh reboot for restarts
+
+## Related Repos
+- [moonlight-tuning](https://github.com/yuhboiililtesti/moonlight-tuning) — Optimized Moonlight+Sunshine streaming config
+- [bulletproof-pipeline](https://github.com/yuhboiililtesti/bulletproof-pipeline) — Self-healing automation stack
+- [homelab-docs](https://github.com/yuhboiililtesti/homelab-docs) — Full documentation
