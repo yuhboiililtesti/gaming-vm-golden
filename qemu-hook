@@ -1,0 +1,8 @@
+#!/bin/bash
+if [ "$1" = "win10-gaming" ]; then
+    for DEV in 0000:0b:00.0 0000:0b:00.1 0000:0b:00.2 0000:0b:00.3; do
+        if [ -e "/sys/bus/pci/devices/$DEV/reset" ]; then
+            echo 1 > "/sys/bus/pci/devices/$DEV/reset" 2>/dev/null
+        fi
+    done
+fi

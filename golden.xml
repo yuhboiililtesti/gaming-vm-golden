@@ -1,0 +1,91 @@
+<domain type="kvm">
+  <name>win10-gaming</name>
+  <memory unit="KiB">12582912</memory>
+  <currentMemory unit="KiB">12582912</currentMemory>
+  <memoryBacking><locked/></memoryBacking>
+  <vcpu placement="static" cpuset="8-15">8</vcpu>
+  <cputune>
+    <vcpupin vcpu="0" cpuset="8"/><vcpupin vcpu="1" cpuset="9"/>
+    <vcpupin vcpu="2" cpuset="10"/><vcpupin vcpu="3" cpuset="11"/>
+    <vcpupin vcpu="4" cpuset="12"/><vcpupin vcpu="5" cpuset="13"/>
+    <vcpupin vcpu="6" cpuset="14"/><vcpupin vcpu="7" cpuset="15"/>
+    <emulatorpin cpuset="0-7"/>
+  </cputune>
+  <memory devices="4"/>
+  <os>
+    <type arch="x86_64" machine="pc-q35-noble">hvm</type>
+    <loader readonly="yes" type="pflash">/usr/share/OVMF/OVMF_CODE_4M.fd</loader>
+    <nvram template="/usr/share/OVMF/OVMF_VARS_4M.fd">/var/lib/libvirt/qemu/nvram/win10-gaming_VARS.fd</nvram>
+    <smbios mode="sysinfo"/>
+    <boot dev="hd"/>
+  </os>
+  <sysinfo type="smbios">
+    <bios><entry name="vendor">American Megatrends Inc.</entry><entry name="version">F37</entry></bios>
+    <system><entry name="manufacturer">Gigabyte Technology Co., Ltd.</entry><entry name="product">B550 AORUS ELITE V2</entry><entry name="version">Default string</entry><entry name="serial">GGB550A001923X</entry></system>
+    <baseBoard><entry name="manufacturer">Gigabyte Technology Co., Ltd.</entry><entry name="product">B550 AORUS ELITE V2</entry><entry name="version">Default string</entry><entry name="serial">GGB550A001923X</entry></baseBoard>
+  </sysinfo>
+  <features>
+    <pmu state="off"/>
+    <acpi/><apic/>
+    <hyperv mode="custom">
+      <relaxed state="on"/><vapic state="on"/><spinlocks state="on" retries="8191"/>
+      <vpindex state="on"/><synic state="on"/><stimer state="on"/><frequencies state="on"/>
+      <vendor_id state="on" value="AuthenticAMD"/>
+    </hyperv>
+    <kvm><hidden state="on"/></kvm>
+    <vmport state="off"/><ioapic driver="kvm"/>
+  </features>
+  <cpu mode="host-passthrough" check="none">
+    <topology sockets="1" dies="1" cores="4" threads="2"/>
+    <feature policy="require" name="topoext"/><feature policy="require" name="invtsc"/>
+    <feature policy="disable" name="hypervisor"/>
+    <feature policy="disable" name="svm"/>
+  </cpu>
+  <clock offset="localtime">
+    <timer name="rtc" tickpolicy="catchup"/><timer name="pit" tickpolicy="delay"/>
+    <timer name="hpet" present="no"/><timer name="hypervclock" present="yes"/>
+    <timer name="tsc" present="yes" mode="native"/>
+  </clock>
+  <on_poweroff>destroy</on_poweroff><on_reboot>restart</on_reboot><on_crash>destroy</on_crash>
+  <devices>
+    <emulator>/usr/bin/qemu-system-x86_64</emulator>
+    <disk type="file" device="disk">
+      <driver name="qemu" type="qcow2" cache="none" io="native"/>
+      <source file="/mnt/nvme/vm/win10-gaming.qcow2"/>
+      <target dev="vda" bus="sata"/>
+    </disk>
+    <controller type="usb" index="0" model="qemu-xhci" ports="15"/>
+    <interface type="network">
+      <source network="default"/>
+      <model type="e1000e"/>
+      <mac address="00:d0:b7:a1:b2:c3"/>
+    </interface>
+    <hostdev mode="subsystem" type="pci" managed="no">
+      <source><address domain="0x0000" bus="0x0b" slot="0x00" function="0x0"/></source>
+      <rom file="/var/lib/libvirt/roms/gtx1660.rom"/>
+      <address type="pci" domain="0x0000" bus="0x01" slot="0x00" function="0x0" multifunction="on"/>
+    </hostdev>
+    <hostdev mode="subsystem" type="pci" managed="no">
+      <source><address domain="0x0000" bus="0x0b" slot="0x00" function="0x1"/></source>
+      <address type="pci" domain="0x0000" bus="0x01" slot="0x00" function="0x1"/>
+    </hostdev>
+    <hostdev mode="subsystem" type="pci" managed="no">
+      <source><address domain="0x0000" bus="0x0b" slot="0x00" function="0x2"/></source>
+      <address type="pci" domain="0x0000" bus="0x01" slot="0x00" function="0x2"/>
+    </hostdev>
+    <hostdev mode="subsystem" type="pci" managed="no">
+      <source><address domain="0x0000" bus="0x0b" slot="0x00" function="0x3"/></source>
+      <address type="pci" domain="0x0000" bus="0x01" slot="0x00" function="0x3"/>
+    </hostdev>
+    <graphics type="spice" port="5900" autoport="yes" listen="0.0.0.0">
+      <listen type="address" address="0.0.0.0"/>
+    </graphics>
+    <video><model type="qxl" ram="131072" vram="131072" vgamem="65536" heads="1" primary="no"/></video>
+    <audio id="1" type="spice"/>
+    <memballoon model="none"/>
+  </devices>
+  <qemu:commandline xmlns="http://libvirt.org/schemas/domain/qemu/1.0">
+    <qemu:arg value="-acpitable"/>
+    <qemu:arg value="file=/opt/thermal.aml"/>
+  </qemu:commandline>
+</domain>
