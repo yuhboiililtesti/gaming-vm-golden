@@ -1,35 +1,30 @@
-# Gaming VM Golden Config
+# gaming-vm-golden
 
-QEMU/KVM GPU passthrough for GTX 1660 SUPER with anti-cheat evasion.
+My KVM GPU passthrough config that took 60+ cold boots to get right. GTX 1660 SUPER on Ubuntu 24.04, QXL+SPICE for display, Moonlight for streaming at 120fps.
 
-## Files
-- `golden.xml` — QXL+SPICE+GPU passthrough, CCX topology, SMBIOS spoof
-- `vfio.conf` — VFIO binding for all 4 GPU functions
-- `start-vm.sh` — Auto-start script (USB bind + define + start)
-- `grub` — Kernel cmdline (isolcpus, pcie_aspm, vfio)
-- `qemu-hook` — GPU reset hook
+## What's in here
+- `golden.xml` — the libvirt XML that finally works. QXL + GPU, CCX topology, SMBIOS spoofing (Gigabyte B550), 12GB locked RAM, e1000e NIC
+- `vfio.conf` — binds all 4 GPU functions, softdeps so nvidia never touches it
+- `grub` — kernel cmdline with isolcpus, pcie_aspm=off, initcall blacklist
+- `start-vm.sh` — auto-start script, handles USB bind
+- `qemu-hook` — GPU reset on VM stop
 
-## Anti-Cheat Layers
-1. Intel MAC OUI (not QEMU 52:54:00)
-2. SATA disk controller (not virtio)
-3. SMBIOS: Gigabyte B550, real serial
-4. KVM hidden
-5. CPU: host-passthrough, AuthenticAMD
-6. Hypervisor disabled, SVM off
-7. Dummy thermal zone (ACPI SSDT)
-8. HPET disabled, PMU off
-9. No tablet/ICH9 artifacts
-10. American Megatrends F37 BIOS
+## Anti-cheat layers
+Built these up over a weekend:
+1. Intel MAC (00:d0:b7) — not the default QEMU 52:54:00 that gets insta-flagged
+2. SATA disk controller — virtio shows as "Red Hat" in device manager
+3. SMBIOS: Gigabyte B550 AORUS ELITE V2, real serial GGB550A001923X
+4. KVM hidden, hypervisor off, SVM disabled
+5. AuthenticAMD vendor string
+6. Dummy ACPI thermal zone so Windows sees normal temps
+7. HPET/PMU disabled, no tablet or ICH9 artifacts
 
-## Boot Order
-1. docker.service + libvirtd.service
-2. gaming-vm.service → auto-start VM
-3. vm-network.service → DNAT + forwarding
-4. docker-ports.service → external access
+## Lessons learned (the hard way)
+- **Never destroy the VM.** Use `virsh reboot` for restarts. Destroy = GPU zombie (PCI header 127) = cold boot.
+- **D3 errors are random per cold boot.** Some boots are clean (0 D3), some aren't. QXL in the XML helps.
+- **remove the ROM file if it's legacy VGA BIOS.** OVMF needs UEFI GOP, not 1990s VGA.
+- **virt-manager is fine, but know your XML.** You'll need it when things break.
 
-## NEVER destroy the VM — use virsh reboot for restarts
-
-## Related Repos
-- [moonlight-tuning](https://github.com/yuhboiililtesti/moonlight-tuning) — Optimized Moonlight+Sunshine streaming config
-- [bulletproof-pipeline](https://github.com/yuhboiililtesti/bulletproof-pipeline) — Self-healing automation stack
-- [homelab-docs](https://github.com/yuhboiililtesti/homelab-docs) — Full documentation
+## Related
+- [moonlight-tuning](https://github.com/yuhboiililtesti/moonlight-tuning) — the streaming half of this setup
+- [bulletproof-pipeline](https://github.com/yuhboiililtesti/bulletproof-pipeline) — keeps everything alive
